@@ -3,24 +3,25 @@
 // SUPABASE_PROJECT_REF: The project reference for your Supabase instance
 // SUPABASE_DB_PASSWORD: The password for your Supabase instance
 // You can find these values in the Supabase dashboard for your remote instance
-require('dotenv').config({ path: '../.env.local' });
-const { execSync } = require('child_process');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
+const { execFileSync } = require('child_process');
 
-// Define the actual command with sensitive data
-const command = `npx supabase link --project-ref "${process.env.SUPABASE_PROJECT_REF}" --password "${process.env.SUPABASE_DB_PASSWORD}"`;
-console.log(command)
-// Create a log-safe version of the command by replacing sensitive data
-const logSafeCommand = command.replace(
-  process.env.SUPABASE_DB_PASSWORD,
-  '[HIDDEN]'
-);
+const projectRef = process.env.SUPABASE_PROJECT_REF;
+const databasePassword = process.env.SUPABASE_DB_PASSWORD;
+
+if (!projectRef || !databasePassword) {
+  console.error('SUPABASE_PROJECT_REF and SUPABASE_DB_PASSWORD are required.');
+  process.exit(1);
+}
 
 try {
-  // Execute the actual command
-  execSync(command, { stdio: 'inherit' });
+	execFileSync(
+		'npx',
+		['supabase', 'link', '--project-ref', projectRef, '--password', databasePassword],
+		{ stdio: 'inherit' },
+	);
 } catch (error) {
-  // Log the safe version of the command
-  console.error('Failed to execute command:', logSafeCommand);
-  console.error('Error:', error.name);
-  process.exit(1);
+	console.error('Supabase link failed:', error.name);
+	process.exit(1);
 }

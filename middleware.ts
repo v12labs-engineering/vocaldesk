@@ -1,19 +1,7 @@
 import { updateSession } from "@/utils/supabase/middleware";
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-	if (request.nextUrl.pathname.startsWith("/api/proxy")) {
-		const payload = await request.json();
-		if (payload.method === "GET") {
-			return await fetch(payload.url, { headers: payload.headers });
-		}
-		return await fetch(payload.url, {
-			method: "POST",
-			headers: payload.headers,
-			body: JSON.stringify(payload.body),
-		});
-	}
-
 	return await updateSession(request);
 }
 
